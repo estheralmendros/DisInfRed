@@ -1,0 +1,224 @@
+PCORE1
+
+vlan 15
+name C
+vlan 25
+name E
+vlan 35
+name D
+vlan 45
+name F
+vlan 55
+name A
+vlan 65
+name B
+vlan 185
+name Admin
+
+interface GigabitEthernet5/1
+ switchport access vlan 185
+
+SWITCHES
+
+interface GigabitEthernet2/1
+ switchport access vlan 55
+interface GigabitEthernet3/1
+ switchport access vlan 55
+interface GigabitEthernet2/1
+ switchport access vlan 25
+interface GigabitEthernet1/1
+ switchport access vlan 400
+interface GigabitEthernet1/1
+ switchport access vlan 400
+
+ROUTER
+
+interface FastEthernet0/0
+no shutdown
+
+interface FastEthernet0/0.15
+encapsulation dot1Q 15
+ip address 10.2.0.1 255.255.254.0
+interface FastEthernet0/0.25
+encapsulation dot1Q 25
+ip address 10.2.2.1 255.255.254.0
+interface FastEthernet0/0.35
+encapsulation dot1Q 35
+ip address 10.2.4.1 255.255.255.0
+interface FastEthernet0/0.45
+encapsulation dot1Q 45
+ip address 10.2.5.1 255.255.255.0
+interface FastEthernet0/0.55
+encapsulation dot1Q 55
+ip address 10.2.6.1 255.255.255.128
+interface FastEthernet0/0.65
+encapsulation dot1Q 65
+ip address 10.2.6.129 255.255.255.192
+
+interface FastEthernet0/0
+no shutdown
+
+interface FastEthernet0/0.115
+encapsulation dot1Q 115
+ip address 10.1.0.1 255.255.254.0
+interface FastEthernet0/0.145
+encapsulation dot1Q 145
+ip address 10.1.6.1 255.255.254.0
+interface FastEthernet0/0.175
+encapsulation dot1Q 175
+ip address 10.1.12.1 255.255.254.0
+
+ip access-list extended admin-in
+permit tcp 10.255.0.16 0.0.0.127 host 10.255.0.1 eq 22
+ip access-list extended admin-out
+permit tcp host 10.255.0.1 eq 22 10.255.0.16 0.0.0.127 established
+
+interface FastEthernet0/0.185
+encapsulation dot1Q 185
+ip address 10.255.0.1 255.255.255.192
+ip access-group admin-in in
+ip access-group admin-out out
+
+ip access-list extended ssh-in
+permit tcp 10.255.0.0 0.0.0.255 any eq 22
+
+VLAN (depts)
+[en el ROUTER LAN]
+
+ip dhcp pool pool15
+ network 10.2.0.0 255.255.254.0
+ default-router 10.2.0.1
+ dns-server 10.1.12.255
+ domain-name site1.enterprise3.com
+ip dhcp pool pool25
+ network 10.2.2.0 255.255.254.0
+ default-router 10.2.2.1
+ dns-server 10.1.12.255
+ domain-name site1.enterprise3.com
+ip dhcp pool pool35
+ network 10.2.4.0 255.255.255.0
+ default-router 10.2.4.1
+ dns-server 10.1.12.255
+ domain-name site1.enterprise3.com
+ip dhcp pool pool45
+ network 10.2.5.0 255.255.255.0
+ default-router 10.2.5.1
+ dns-server 10.1.12.255
+ domain-name site1.enterprise3.com
+ip dhcp pool pool55
+ network 10.2.6.0 255.255.255.128
+ default-router 10.2.6.1
+ dns-server 10.1.12.255
+ domain-name site1.enterprise3.com
+ip dhcp pool pool65
+ network 10.2.6.128 255.255.255.192
+ default-router 10.2.6.129
+ dns-server 10.1.12.255
+ domain-name site1.enterprise3.com
+
+ip dhcp excluded-address 10.2.0.1
+ip dhcp excluded-address 10.2.2.1
+ip dhcp excluded-address 10.2.4.1
+ip dhcp excluded-address 10.2.5.1
+ip dhcp excluded-address 10.2.6.1
+ip dhcp excluded-address 10.2.6.129
+
+VLAN (servidores)
+[en PCORE1]
+
+vlan 115
+name APP1-Front
+vlan 125
+name APP1-W2L
+vlan 135
+name APP1-L2DB
+vlan 145
+name APP2-Front
+vlan 155
+name APP2-W2L
+vlan 165
+name APP2-L2DB
+vlan 175
+name DNS
+
+ADMIN
+
+enable
+conf term
+interface vlan185
+ip address 10.255.0.2 255.255.255.192
+
+enable secret cisco
+line vty 0 15
+password cisco
+login
+service password-encryption
+hostname Core1
+ip domain-name midominio
+crypto key generate rsa
+1024
+username admin secret vc0910$$
+line vty 0 15
+transport input ssh
+login local
+
+end
+copy run start
+
+[en cada switch]
+
+interface vlan185
+ip address 10.255.0.3 255.255.255.192
+
+interface vlan185
+ip address 10.255.0.4 255.255.255.192
+
+interface vlan185
+ip address 10.255.0.5 255.255.255.192
+
+interface vlan185
+ip address 10.255.0.6 255.255.255.192
+
+interface vlan185
+ip address 10.255.0.7 255.255.255.192
+
+interface vlan185
+ip address 10.255.0.8 255.255.255.192
+
+interface vlan185
+ip address 10.255.0.9 255.255.255.192
+
+interface vlan185
+ip address 10.255.0.10 255.255.255.192
+
+interface vlan185
+ip address 10.255.0.11 255.255.255.192
+
+interface vlan185
+ip address 10.255.0.12 255.255.255.192
+
+interface vlan185
+ip address 10.255.0.13 255.255.255.192
+
+interface vlan185
+ip address 10.255.0.14 255.255.255.192
+
+interface vlan185
+ip address 10.255.0.15 255.255.255.192
+
+enable
+conf ter
+vtp domain dominioesther
+vtp password pepe
+vtp version 2
+vtp mode client
+end
+copy run start
+
+ROUTER INET
+
+ip nat inside source static tcp 10.1.0.255 80 80.1.2.0 80 
+ip nat inside source static tcp 10.1.6.255 443 80.1.2.0 443
+ip nat inside source static tcp 10.1.0.255 80 80.1.2.1 80 
+ip nat inside source static tcp 10.1.6.255 443 80.1.2.1 443
+ip nat inside source static udp 10.1.12.255 53 80.1.2.0 53 
